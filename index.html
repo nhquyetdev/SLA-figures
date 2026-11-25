@@ -130,7 +130,7 @@ tr.clk{cursor:pointer}
 .pack .amt{font-size:22px;font-weight:800;margin:6px 0}
 .gbtn{background:linear-gradient(#f0c84e,#b48a1c);color:#2a1e00;border:1px solid #ffe28a;border-radius:6px;padding:8px 22px;font-size:20px;font-weight:700}
 input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:6px;font-size:18px}
-.ico{width:1.1em;height:1.1em;vertical-align:middle;object-fit:contain}
+.ico{width:1.5em;height:1.5em;vertical-align:middle;object-fit:contain}
 </style>
 </head>
 <body>
@@ -152,7 +152,7 @@ input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--tex
   </div>
 </div>
 
-<!-- ================= GAME ================= -->
+<!-- ================= APP ================= -->
 <div id="game" class="screen hidden">
   <div class="top">
     <button class="back" onclick="showMenu()"><i>❮</i> Figures</button>
@@ -232,8 +232,6 @@ input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--tex
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-/* ============ FIREBASE CONFIG — paste yours here ============
-   Leave apiKey empty to play offline (local save + simulated rivals). */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD2rN1F_zgnyIEGaT2tPKv8fkrwGKy0OtM",
   authDomain: "figures-90c56.firebaseapp.com",
@@ -244,13 +242,6 @@ const FIREBASE_CONFIG = {
   appId: "1:130722464332:web:1c9b53eaac268d756eaae9"
 };
 const DB_ROOT = 'slf';
-
-/* ============ IMAGES ============
-   Thumbnail (256x128): img/thumbs/<id>_<tier>.png
-   Statue    (397x675): img/figures/<id>_<tier>.png
-   tier = low (below B) | b | a | s     — missing tier falls back to _low, then an icon */
-
-/* ============ DATA ============ */
 const RANKS=[
   {r:'S',p:1.5, base:9000},{r:'A',p:2.6, base:7000},{r:'B',p:7.6, base:5000},
   {r:'C',p:18.3,base:3000},{r:'D',p:30,  base:2000},{r:'E',p:40,  base:1000},
@@ -269,9 +260,9 @@ const STATS=[
 ];
 const FIGS=[
   {id:1,n:'Knight Figure',             ex:'Hunters Exclusive',                 u:"Hunters' Critical Hit damage increases by <b>30%</b>", icon:'🗡️'},
-  {id:2,n:'Conjuror Figure',           ex:'Sung Jinwoo, Successors Exclusive', u:"Sung Jinwoo and Successors' Critical Hit damage increases by <b>30%</b>", icon:'🔮'},
+  {id:2,n:'Conjuror Figure',           ex:'Sung, Successors', u:"Sung Jinwoo and Successors' Critical Hit damage increases by <b>30%</b>", icon:'🔮'},
   {id:3,n:'Figure of White Flames',    ex:'Hunters Exclusive',                 u:"Hunters' Basic Skill damage increases by <b>50%</b>", icon:'🔥'},
-  {id:4,n:'Figure of Transfiguration', ex:'Sung Jinwoo, Successors Exclusive', u:"Sung Jinwoo and Successors' Basic Skill Damage increases by <b>50%</b>", icon:'🌀'},
+  {id:4,n:'Figure of Transfiguration', ex:'Sung, Successors', u:"Sung Jinwoo and Successors' Basic Skill Damage increases by <b>50%</b>", icon:'🌀'},
   {id:5,n:'Figure of Steel',           ex:'Hunters Exclusive',                 u:"Hunters' Overload damage increases by <b>30%</b>", icon:'🛡️'},
 ];
 const COST={gold:300000,polish:10,seal:1};
@@ -294,13 +285,12 @@ function rollOne(rng=Math.random){
   return {r:rank,s:Math.floor(rng()*STATS.length)};
 }
 const rollFig=rng=>[rollOne(rng),rollOne(rng),rollOne(rng)];
-function startStats(){ // all E, 3 different stats
+function startStats(){
   const pool=[...STATS.keys()].sort(()=>Math.random()-.5);
   return pool.slice(0,3).map(s=>({r:'E',s}));
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* ============ IMAGE LOADING with fallback ============ */
 const missing=new Set();
 function imgSrc(kind,id,tier){
   for(const t of [tier,'low']){const u=`img/${kind}/${id}_${t}.png`;if(!missing.has(u))return u;}
@@ -393,8 +383,7 @@ function render(){
   $('figName').textContent=f.n;
   const statue=$('statue');statue.className='statue tier-'+t;statue.innerHTML=imgHtml('figures',f,t);
   const pt=$('ptag');pt.className='ptag'+(on?' on':'');
-  pt.textContent=on?`✨ Passive ${w} ACTIVE  +${fmt(PASSIVE_BONUS)}`:`Passive ${w} — need all stats B or higher`;
-  $('statTitle').textContent=`Figure Stats (${f.ex})`;
+  $('statTitle').textContent=`Figure (${f.ex})`;
   $('unique').innerHTML=f.u;
   $('figScore').textContent=fmt(figScore(F.stats));
 
@@ -508,8 +497,7 @@ function resetAll(){if(confirm('Reset all your figures, currency and paid total?
 function buildRate(){
   $('rateBody').innerHTML=`<table><tr><th>Stat</th>${RANKS.map(R=>`<th style="color:var(--${R.r})">${R.r} (${R.p}%)</th>`).join('')}</tr>`+
     STATS.map(d=>`<tr><td>${d.n}</td>${RANKS.map(R=>`<td>${d.pct?d.v[R.r]+'%':fmt(d.v[R.r])}<br><span class="small">${fmt(R.base+d.bonus)} pts</span></td>`).join('')}</tr>`).join('')+
-    `<tr><td>Rate per stat</td>${RANKS.map(R=>`<td>${(R.p/9).toFixed(4)}%</td>`).join('')}</tr></table>
-    <p class="small">Passive activates when all 3 stats are B-Rank or higher (+${fmt(PASSIVE_BONUS)} pts). Passive rank = lowest stat rank (S S E → passive E).</p>`;
+    `<tr><td>Rate per stat</td>${RANKS.map(R=>`<td>${(R.p/9).toFixed(4)}%</td>`).join('')}</tr></table>`;
 }
 
 /* ============ MODALS ============ */
@@ -532,5 +520,7 @@ addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeo
 
 fit();load();buildShop();buildRate();render();initOnline();
 </script>
+<script src="features.js"></script>
+<script src="audio.js"></script>
 </body>
 </html>
