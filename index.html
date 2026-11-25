@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
+<title>Solo Leveling: Figures</title>
+<style>
+:root{
+  --bg:#0b0d1c; --line:#2d3570; --text:#e8eaff; --dim:#9aa1d0; --gold:#ffd25a;
+  --S:#ff5a7a; --A:#ff9b3d; --B:#c98bff; --C:#4fa8ff; --D:#4fd18b; --E:#9a9aa8;
+  --t-low:#a08060; --t-b:#c98bff; --t-a:#ff9b3d; --t-s:#ff5a7a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;user-select:none}
+button{font-family:inherit;cursor:pointer}
+
+/* fixed 1600x900 stage, scaled (and rotated on portrait phones) by fit() */
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 30%,#2e2868 0%,#141433 45%,var(--bg) 80%)}
+.screen{position:absolute;inset:0}
+.hidden{display:none!important}
+
+/* ---------- MENU ---------- */
+#menu{display:flex;align-items:center;justify-content:center;gap:90px}
+.menu-left{display:flex;flex-direction:column;align-items:center;gap:26px}
+.logo{font-size:72px;font-weight:900;letter-spacing:3px;margin:0;line-height:1;text-align:center;text-shadow:0 0 30px rgba(120,110,255,.85)}
+.logo span{display:block;color:var(--gold);font-size:92px;text-shadow:0 0 34px rgba(255,210,90,.7)}
+.menu-btns{display:flex;flex-direction:column;gap:16px;width:420px}
+.mbtn{display:block;text-align:center;text-decoration:none;font-size:26px;font-weight:700;padding:18px;border-radius:12px;border:1px solid #5865c9;background:#1b2044;color:var(--text)}
+.mbtn:hover{filter:brightness(1.25)}
+.mbtn.start{background:linear-gradient(#f0c84e,#b48a1c);color:#2a1e00;border-color:#ffe28a;font-size:34px}
+.mbtn.kofi{background:#2a1d3d;border-color:#ff5e8a}
+.mbtn.yt{background:#3a1414;border-color:#ff3b3b}
+.net{font-size:16px;padding:6px 16px;border-radius:20px;background:#262b55}
+.net.on{background:#164a2c;color:#7dffa8}
+.net.off{background:#4a1d1d;color:#ffb0b0}
+.recruit{width:520px;height:520px;border:2px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--dim);font-size:20px;text-align:center}
+.recruit img{max-width:100%;max-height:100%;display:block}
+
+/* ---------- GAME ---------- */
+.top{position:absolute;left:0;right:0;top:0;height:76px;display:flex;align-items:center;gap:14px;padding:0 26px;background:linear-gradient(#0a0c22ee,#0a0c2200)}
+.back{background:none;border:none;color:var(--text);font-size:34px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
+.back i{font-style:normal;color:#7d8cff;font-size:40px}
+.cur{display:flex;align-items:center;gap:10px;background:#1b2550;border:1px solid var(--line);padding:6px 18px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;min-width:200px;justify-content:space-between}
+.tbtn{background:#1b2044;color:var(--text);border:1px solid #5865c9;border-radius:8px;padding:10px 18px;font-size:20px;font-weight:600}
+
+.col-left{position:absolute;left:34px;top:90px;width:450px}
+.owned{color:var(--dim);font-size:26px;font-weight:700;margin-bottom:12px}
+.owned b{color:var(--text)}
+.fig-item{position:relative;width:440px;height:132px;margin-bottom:12px;border:2px solid #39407a;background:#151937;display:flex;align-items:center;cursor:pointer}
+.fig-item.sel{border-color:#fff;background:#d9d4cc}
+.thumb{width:256px;height:128px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.thumb img{width:256px;height:128px;object-fit:cover;display:block}
+.thumb .ph{font-size:64px}
+.fig-item .badge{width:88px;height:88px;margin-left:46px;transform:rotate(45deg);border:2px solid #4a5290;background:#151937;display:flex;align-items:center;justify-content:center}
+.fig-item.sel .badge{background:#2a2f55;border-color:#fff}
+.badge b{transform:rotate(-45deg);font-family:Georgia,serif;font-size:50px}
+
+.col-mid{position:absolute;left:500px;top:96px;width:420px;height:790px;display:flex;flex-direction:column;align-items:center}
+.col-mid h2{margin:0 0 4px;font-size:32px}
+.statue{width:397px;height:675px;display:flex;align-items:center;justify-content:center;position:relative}
+.statue img{width:397px;height:675px;object-fit:contain}
+.statue .ph{font-size:220px}
+.ptag{margin-top:6px;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:700;background:#262b55;color:var(--dim);white-space:nowrap}
+.ptag.on{background:linear-gradient(90deg,#8a6512,#e9c14a,#8a6512);color:#1d1400}
+
+/* tier colouring (used when no tier image exists, and as glow) */
+.tier-low .ph{filter:sepia(1) saturate(.6) brightness(.85)}
+.tier-b .ph{filter:drop-shadow(0 0 18px var(--t-b)) hue-rotate(230deg) saturate(2)}
+.tier-a .ph{filter:drop-shadow(0 0 18px var(--t-a)) sepia(1) saturate(4) hue-rotate(-15deg)}
+.tier-s .ph{filter:drop-shadow(0 0 22px var(--t-s)) sepia(1) saturate(6) hue-rotate(-50deg)}
+.statue.tier-b img{filter:drop-shadow(0 0 18px var(--t-b))}
+.statue.tier-a img{filter:drop-shadow(0 0 20px var(--t-a))}
+.statue.tier-s img{filter:drop-shadow(0 0 24px var(--t-s))}
+
+.col-right{position:absolute;left:940px;top:96px;width:630px}
+.rhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.rhead h3{margin:0;font-size:28px}
+.rate{background:#bcd0ff;color:#1e2a6a;border:2px solid #fff;border-radius:24px;padding:8px 26px;font-size:22px;font-weight:700}
+.stat{height:112px;display:flex;align-items:center;gap:16px;margin-bottom:16px;border:2px solid #5a2a3a;border-radius:56px 6px 6px 56px;padding:0 14px 0 6px;background:linear-gradient(90deg,#3a1a24,#1a1530 70%)}
+.stat.rB{border-color:#4a3570;background:linear-gradient(90deg,#2a1f45,#171535 70%)}
+.stat.rlow{border-color:#2d3570;background:linear-gradient(90deg,#1b2044,#141733 70%)}
+.stat.flash{animation:fl .5s}
+@keyframes fl{0%{filter:brightness(2)}100%{filter:none}}
+.rk{width:100px;height:100px;border-radius:50%;border:3px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:62px;font-weight:700;background:#0e1028;flex-shrink:0}
+.stat .info{flex:1;text-align:right}
+.stat .n{font-size:23px;font-weight:600;white-space:nowrap}
+.stat .v{color:var(--gold);font-size:32px;font-weight:800}
+.stat .sc{color:var(--dim);font-size:15px}
+.lock{width:96px;height:72px;border-radius:4px;border:2px solid #555c90;background:#20264f;font-size:34px;flex-shrink:0}
+.lock.on{background:#efe9d8;border-color:#fff}
+.uhead{color:var(--gold);font-size:26px;font-weight:700;margin:4px 0 6px}
+.ubox{border:1px solid var(--line);border-radius:8px;padding:14px 18px;background:#10132c;font-size:24px;height:100px}
+.ubox b{color:var(--gold)}
+.cost{display:flex;justify-content:space-around;align-items:center;margin:14px 0;background:#10132c;border-radius:40px;padding:10px;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.bad{color:#ff4d4d}
+.dimc{opacity:.45}
+.row{display:flex;align-items:center;justify-content:space-between}
+.chk{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:600;cursor:pointer}
+.chk input{width:30px;height:30px}
+.fscore{font-size:20px;color:var(--dim)}
+.fscore b{color:var(--gold);font-size:26px}
+.convert{width:100%;margin-top:12px;font-size:32px;font-weight:800;padding:14px;border-radius:4px;border:2px solid #ffe28a;background:linear-gradient(#d9b43c,#8c6a12);color:#2a1e00}
+.convert:active{filter:brightness(1.3)}
+.msg{height:28px;text-align:center;margin-top:6px;font-size:20px}
+
+/* ---------- MODALS ---------- */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:10}
+.modal-bg.show{display:flex}
+.modal{background:#141833;border:1px solid #5865c9;border-radius:14px;padding:24px;width:1300px;max-height:840px;overflow:auto;font-size:20px;user-select:text}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.mhead h3{margin:0;font-size:30px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.side{border:1px solid var(--line);border-radius:10px;padding:14px}
+.side h4{margin:0 0 8px;font-size:24px}
+.mini{display:flex;align-items:center;gap:12px;margin:8px 0}
+.mini .rk{width:56px;height:56px;font-size:32px}
+.mini b{color:var(--gold)}
+.small{font-size:16px;color:var(--dim)}
+table{width:100%;border-collapse:collapse;font-size:18px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--dim)}
+tr.me{background:rgba(255,210,90,.12)}
+tr.clk{cursor:pointer}
+.shopgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.pack{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;background:#1b2044}
+.pack .amt{font-size:22px;font-weight:800;margin:6px 0}
+.gbtn{background:linear-gradient(#f0c84e,#b48a1c);color:#2a1e00;border:1px solid #ffe28a;border-radius:6px;padding:8px 22px;font-size:20px;font-weight:700}
+input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:6px;font-size:18px}
+.ico{width:1.1em;height:1.1em;vertical-align:middle;object-fit:contain}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ================= MAIN MENU ================= -->
+<div id="menu" class="screen">
+  <div class="menu-left">
+    <h1 class="logo">SOLO LEVELING<span>FIGURES</span></h1>
+    <div class="net" id="netTag">Connecting…</div>
+    <div class="menu-btns">
+      <button class="mbtn start" onclick="startGame()">▶ START</button>
+      <a class="mbtn kofi" href="https://ko-fi.com/lichstream" target="_blank" rel="noopener">☕ Support Me</a>
+      <a class="mbtn yt" href="https://www.youtube.com/@LichStream" target="_blank" rel="noopener">▶ YouTube @LichStream</a>
+    </div>
+  </div>
+  <div class="recruit">
+    <img src="img/recruit.png" alt="Recruit" onerror="this.parentNode.innerHTML='📢 Put your banner at<br><b>img/recruit.png</b>'">
+  </div>
+</div>
+
+<!-- ================= GAME ================= -->
+<div id="game" class="screen hidden">
+  <div class="top">
+    <button class="back" onclick="showMenu()"><i>❮</i> Figures</button>
+    <div class="cur" title="Polish of Change"><img class="ico" src="img/icons/polish.png" alt=""> <span id="cPolish"></span></div>
+    <div class="cur" title="Seals of Unity"><img class="ico" src="img/icons/seal.png" alt=""> <span id="cSeal"></span></div>
+    <div class="cur" title="Gold"><img class="ico" src="img/icons/gold.png" alt=""> <span id="cGold"></span></div>
+    <button class="tbtn" onclick="openModal('shop')">🛒 Shop</button>
+    <button class="tbtn" onclick="openBoard()">🏆 Ranking</button>
+  </div>
+
+  <div class="col-left">
+    <div class="owned">Owned Figures <b>5 / 5</b></div>
+    <div id="figList"></div>
+  </div>
+
+  <div class="col-mid">
+    <h2 id="figName"></h2>
+    <div class="statue" id="statue"></div>
+    <div class="ptag" id="ptag"></div>
+  </div>
+
+  <div class="col-right">
+    <div class="rhead"><h3 id="statTitle"></h3><button class="rate" onclick="openModal('rate')">📊 Rate Info</button></div>
+    <div id="stats"></div>
+    <div class="uhead">Unique Effects</div>
+    <div class="ubox" id="unique"></div>
+    <div class="cost" id="cost"></div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="saveChk" onchange="render()"> Save Stats</label>
+      <span class="fscore">Score <b id="figScore"></b></span>
+    </div>
+    <button class="convert" onclick="convert()">Convert</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<!-- Save Stats choice -->
+<div class="modal-bg" id="m-choose"><div class="modal" style="width:1000px">
+  <div class="mhead"><h3>Save Stats — choose which to keep</h3></div>
+  <div class="cmp">
+    <div class="side"><h4>Old</h4><div id="oldSide"></div><button class="tbtn" style="width:100%;font-size:26px" onclick="choose(false)">Keep Old</button></div>
+    <div class="side"><h4>New</h4><div id="newSide"></div><button class="gbtn" style="width:100%;font-size:26px" onclick="choose(true)">Take New</button></div>
+  </div>
+</div></div>
+
+<!-- Shop -->
+<div class="modal-bg" id="m-shop"><div class="modal">
+  <div class="mhead"><h3>🛒 Shop (simulation — no real money)</h3><button class="tbtn" onclick="closeModal('shop')">✕</button></div>
+  <div class="small" style="margin-bottom:10px">Total paid: <b id="paidTxt" style="color:var(--gold)"></b></div>
+  <h4><img class="ico" src="img/icons/gold.png" alt=""> Gold ($1 = 1,000,000)</h4><div class="shopgrid" id="shopGold"></div>
+  <h4><img class="ico" src="img/icons/polish.png" alt=""> Polish of Change ($5 = 80)</h4><div class="shopgrid" id="shopPolish"></div>
+  <h4><img class="ico" src="img/icons/seal.png" alt=""> Seals of Unity ($10 = 15)</h4><div class="shopgrid" id="shopSeal"></div>
+</div></div>
+
+<!-- Leaderboard -->
+<div class="modal-bg" id="m-board"><div class="modal">
+  <div class="mhead"><h3>🏆 Ranking</h3><button class="tbtn" onclick="closeModal('board')">✕</button></div>
+  <div class="row" style="margin-bottom:10px">
+    <span>Your name: <input type="text" id="nameIn" maxlength="16" onchange="setName(this.value)"></span>
+    <span class="small">Score = 5 figures' stat scores + 10,000 per active passive. Click a row for total stats.</span>
+  </div>
+  <table><thead><tr><th>#</th><th>Player</th><th>Score</th><th>Passives</th><th>Best Figure</th><th>Paid</th></tr></thead><tbody id="boardBody"></tbody></table>
+  <div id="boardDetail" style="margin-top:12px"></div>
+  <div style="margin-top:14px;text-align:right"><button class="tbtn" onclick="resetAll()">Reset my progress</button></div>
+</div></div>
+
+<!-- Rate info -->
+<div class="modal-bg" id="m-rate"><div class="modal">
+  <div class="mhead"><h3>📊 Rate Info</h3><button class="tbtn" onclick="closeModal('rate')">✕</button></div>
+  <div class="small" style="margin-bottom:8px">The displayed rate is rounded up and the sum of the displayed rates may not add up to 100%.</div>
+  <div id="rateBody"></div>
+</div></div>
+
+</div><!-- /stage -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ============ FIREBASE CONFIG — paste yours here ============
+   Leave apiKey empty to play offline (local save + simulated rivals). */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD2rN1F_zgnyIEGaT2tPKv8fkrwGKy0OtM",
+  authDomain: "figures-90c56.firebaseapp.com",
+  databaseURL: "https://figures-90c56-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "figures-90c56",
+  storageBucket: "figures-90c56.firebasestorage.app",
+  messagingSenderId: "130722464332",
+  appId: "1:130722464332:web:1c9b53eaac268d756eaae9"
+};
+const DB_ROOT = 'slf';
+
+/* ============ IMAGES ============
+   Thumbnail (256x128): img/thumbs/<id>_<tier>.png
+   Statue    (397x675): img/figures/<id>_<tier>.png
+   tier = low (below B) | b | a | s     — missing tier falls back to _low, then an icon */
+
+/* ============ DATA ============ */
+const RANKS=[
+  {r:'S',p:1.5, base:9000},{r:'A',p:2.6, base:7000},{r:'B',p:7.6, base:5000},
+  {r:'C',p:18.3,base:3000},{r:'D',p:30,  base:2000},{r:'E',p:40,  base:1000},
+];
+const RI={S:0,A:1,B:2,C:3,D:4,E:5};
+const STATS=[
+  {n:'Attack and Defense (%)',       pct:1,bonus:1000,v:{S:60,A:40,B:20,C:15,D:10,E:5}},
+  {n:'Additional Attack and Defense',      bonus:500, v:{S:8000,A:5350,B:2650,C:2000,D:1350,E:650}},
+  {n:'HP (%)',                        pct:1,bonus:333, v:{S:36,A:24,B:12,C:9,D:6,E:3}},
+  {n:'Additional HP',                      bonus:0,   v:{S:9000,A:6000,B:3000,C:2250,D:1500,E:750}},
+  {n:'Critical Hit Rate',                  bonus:0,   v:{S:6000,A:4000,B:2000,C:1500,D:1000,E:500}},
+  {n:'Critical Hit Damage',                bonus:0,   v:{S:6000,A:4000,B:2000,C:1500,D:1000,E:500}},
+  {n:'Defense Penetration',                bonus:0,   v:{S:6000,A:4000,B:2000,C:1500,D:1000,E:500}},
+  {n:'Damage Increase',                    bonus:0,   v:{S:6000,A:4000,B:2000,C:1500,D:1000,E:500}},
+  {n:'Additional MP',                      bonus:0,   v:{S:750,A:500,B:250,C:190,D:125,E:60}},
+];
+const FIGS=[
+  {id:1,n:'Knight Figure',             ex:'Hunters Exclusive',                 u:"Hunters' Critical Hit damage increases by <b>30%</b>", icon:'🗡️'},
+  {id:2,n:'Conjuror Figure',           ex:'Sung Jinwoo, Successors Exclusive', u:"Sung Jinwoo and Successors' Critical Hit damage increases by <b>30%</b>", icon:'🔮'},
+  {id:3,n:'Figure of White Flames',    ex:'Hunters Exclusive',                 u:"Hunters' Basic Skill damage increases by <b>50%</b>", icon:'🔥'},
+  {id:4,n:'Figure of Transfiguration', ex:'Sung Jinwoo, Successors Exclusive', u:"Sung Jinwoo and Successors' Basic Skill Damage increases by <b>50%</b>", icon:'🌀'},
+  {id:5,n:'Figure of Steel',           ex:'Hunters Exclusive',                 u:"Hunters' Overload damage increases by <b>30%</b>", icon:'🛡️'},
+];
+const COST={gold:300000,polish:10,seal:1};
+const PASSIVE_BONUS=10000;
+const PRICES=[5,10,20,50,100];
+const KEY='sl_figures_v1';
+
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const statScore=s=>RANKS[RI[s.r]].base+STATS[s.s].bonus;
+const statVal=s=>{const d=STATS[s.s];return d.pct?d.v[s.r]+'%':fmt(d.v[s.r]);};
+const worst=stats=>stats.reduce((w,s)=>RI[s.r]>RI[w]?s.r:w,'S');
+const passiveOn=stats=>RI[worst(stats)]<=RI.B;
+const tierOf=stats=>({S:'s',A:'a',B:'b'})[worst(stats)]||'low';
+const figScore=stats=>stats.reduce((a,s)=>a+statScore(s),0)+(passiveOn(stats)?PASSIVE_BONUS:0);
+function rollOne(rng=Math.random){
+  let x=rng()*100,acc=0,rank='E';
+  for(const R of RANKS){acc+=R.p;if(x<acc){rank=R.r;break;}}
+  return {r:rank,s:Math.floor(rng()*STATS.length)};
+}
+const rollFig=rng=>[rollOne(rng),rollOne(rng),rollOne(rng)];
+function startStats(){ // all E, 3 different stats
+  const pool=[...STATS.keys()].sort(()=>Math.random()-.5);
+  return pool.slice(0,3).map(s=>({r:'E',s}));
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ============ IMAGE LOADING with fallback ============ */
+const missing=new Set();
+function imgSrc(kind,id,tier){
+  for(const t of [tier,'low']){const u=`img/${kind}/${id}_${t}.png`;if(!missing.has(u))return u;}
+  return null;
+}
+function imgHtml(kind,f,tier){
+  const src=imgSrc(kind,f.id,tier);
+  if(!src)return `<div class="ph">${f.icon}</div>`;
+  return `<img src="${src}" alt="" onerror="imgFail(this,'${kind}',${f.id},'${tier}')">`;
+}
+function imgFail(el,kind,id,tier){
+  missing.add(el.getAttribute('src'));
+  el.outerHTML=imgHtml(kind,FIGS[id-1],tier);
+}
+
+/* ============ STATE ============ */
+let st,sel=0,pending=null;
+function fresh(){return{name:'Hunter',gold:30000000,polish:2000,seal:100,paid:0,figs:FIGS.map(()=>({stats:startStats(),lock:-1,rolls:0}))};}
+function valid(s){return s&&Array.isArray(s.figs)&&s.figs.length===5&&s.figs.every(f=>Array.isArray(f.stats)&&f.stats.length===3);}
+function load(){try{st=JSON.parse(localStorage.getItem(KEY));}catch(e){}if(!valid(st))st=fresh();}
+function save(){st.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}schedulePush();}
+
+/* ============ ONLINE ============ */
+let db=null,uid=null,online=false,pushTimer=null;
+function setNet(state,text){const n=$('netTag');n.className='net '+(state===true?'on':state===false?'off':'');n.textContent=text;}
+function localId(){
+  let id=null;try{id=localStorage.getItem('slf_pid');}catch(e){}
+  if(!id){id='p_'+Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{localStorage.setItem('slf_pid',id);}catch(e){}}
+  return id;
+}
+async function initOnline(){
+  if(!FIREBASE_CONFIG.apiKey||typeof firebase==='undefined'){setNet(false,'⚪ Offline mode');return;}
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    try{
+      const cred=await firebase.auth().signInAnonymously();
+      uid=cred.user.uid;
+    }catch(e){
+      // auth/admin-restricted-operation = Anonymous sign-in is not enabled → fall back to a device ID
+      console.warn('Anonymous sign-in unavailable, using device ID:',e.code);
+      uid=localId();
+    }
+    db=firebase.database();
+    const snap=await db.ref(`${DB_ROOT}/saves/${uid}`).get();
+    const cloud=snap.val();
+    if(valid(cloud)&&(cloud.t||0)>(st.t||0)){st=cloud;try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+    online=true;setNet(true,'🟢 Online');
+    pushNow();render();
+  }catch(e){console.error(e);setNet(false,'🔴 Offline — '+(e.code||e.message));}
+}
+function schedulePush(){if(!online)return;clearTimeout(pushTimer);pushTimer=setTimeout(pushNow,1500);}
+function pushNow(){
+  if(!online)return;
+  const s=summary(st),up={};
+  up[`${DB_ROOT}/saves/${uid}`]=st;
+  up[`${DB_ROOT}/board/${uid}`]={name:st.name,paid:st.paid,score:s.score,pass:s.pass,figs:st.figs.map(f=>({stats:f.stats})),updated:firebase.database.ServerValue.TIMESTAMP};
+  db.ref().update(up).catch(e=>{console.error(e);setNet(false,'🔴 Save failed — '+(e.code||e.message));});
+}
+
+/* ============ MENU ============ */
+function startGame(){
+  goLandscape();
+  if(!st.named){const v=prompt('Enter your Hunter name (max 16):',st.name);if(v&&v.trim())st.name=v.trim().slice(0,16);st.named=true;save();}
+  $('menu').classList.add('hidden');$('game').classList.remove('hidden');render();
+}
+function showMenu(){$('game').classList.add('hidden');$('menu').classList.remove('hidden');}
+function goLandscape(){
+  if(!('ontouchstart' in window))return;
+  const el=document.documentElement;
+  const req=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(req&&!document.fullscreenElement){
+    Promise.resolve(req.call(el)).then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).catch(()=>{}).finally(()=>setTimeout(fit,300));
+  }
+}
+
+/* ============ RENDER ============ */
+function render(){
+  $('cGold').textContent=fmt(st.gold);
+  $('cPolish').textContent=fmt(st.polish);
+  $('cSeal').textContent=fmt(st.seal);
+
+  $('figList').innerHTML=FIGS.map((f,i)=>{
+    const s=st.figs[i].stats,w=worst(s),t=tierOf(s);
+    return `<div class="fig-item ${i===sel?'sel':''}" onclick="pick(${i})">
+      <div class="thumb tier-${t}">${imgHtml('thumbs',f,t)}</div>
+      <div class="badge"><b style="color:var(--${w})">${w}</b></div></div>`;
+  }).join('');
+
+  const f=FIGS[sel],F=st.figs[sel],on=passiveOn(F.stats),w=worst(F.stats),t=tierOf(F.stats);
+  $('figName').textContent=f.n;
+  const statue=$('statue');statue.className='statue tier-'+t;statue.innerHTML=imgHtml('figures',f,t);
+  const pt=$('ptag');pt.className='ptag'+(on?' on':'');
+  pt.textContent=on?`✨ Passive ${w} ACTIVE  +${fmt(PASSIVE_BONUS)}`:`Passive ${w} — need all stats B or higher`;
+  $('statTitle').textContent=`Figure Stats (${f.ex})`;
+  $('unique').innerHTML=f.u;
+  $('figScore').textContent=fmt(figScore(F.stats));
+
+  $('stats').innerHTML=F.stats.map((s,i)=>`
+    <div class="stat ${RI[s.r]<=1?'':RI[s.r]===2?'rB':'rlow'}" id="st${i}">
+      <div class="rk" style="color:var(--${s.r})">${s.r}</div>
+      <div class="info"><div class="n">${STATS[s.s].n}</div><div class="v">${statVal(s)}</div><div class="sc">${fmt(statScore(s))} pts</div></div>
+      <button class="lock ${F.lock===i?'on':''}" onclick="toggleLock(${i})">${F.lock===i?'🔒':'🔓'}</button>
+    </div>`).join('');
+
+  const m=$('saveChk').checked?2:1,locked=F.lock>=0;
+  const g=COST.gold*m,p=COST.polish*m,se=COST.seal*m;
+  $('cost').innerHTML=
+    `<span class="${st.gold<g?'bad':''}"><img class="ico" src="img/icons/gold.png" alt=""> x${fmt(g)}</span>`+
+    `<span><img class="ico" src="img/icons/polish.png" alt=""> <span class="${st.polish<p?'bad':''}">${fmt(st.polish)}</span>/${p}</span>`+
+    `<span class="${locked?'':'dimc'}"><img class="ico" src="img/icons/seal.png" alt=""> <span class="${locked&&st.seal<se?'bad':''}">${fmt(st.seal)}</span>/${se}</span>`;
+}
+function curCost(){
+  const m=$('saveChk').checked?2:1,locked=st.figs[sel].lock>=0;
+  return {gold:COST.gold*m,polish:COST.polish*m,seal:locked?COST.seal*m:0};
+}
+
+/* ============ ACTIONS ============ */
+function pick(i){sel=i;msg('');render();}
+function toggleLock(i){const F=st.figs[sel];F.lock=F.lock===i?-1:i;save();render();}
+function msg(t,ok){const m=$('msg');m.style.color=ok?'#7dffa8':'#ff8a8a';m.textContent=t;}
+function convert(){
+  if(pending)return;
+  const c=curCost(),F=st.figs[sel];
+  if(st.gold<c.gold||st.polish<c.polish||st.seal<c.seal){msg('Not enough materials — open the 🛒 Shop');return;}
+  st.gold-=c.gold;st.polish-=c.polish;st.seal-=c.seal;F.rolls=(F.rolls||0)+1;
+  const nw=F.stats.map((s,i)=>i===F.lock?{...s}:rollOne());
+  if($('saveChk').checked){
+    pending=nw;save();render();
+    $('oldSide').innerHTML=miniList(F.stats);$('newSide').innerHTML=miniList(nw);
+    openModal('choose');
+  }else apply(nw);
+}
+function apply(nw){
+  const F=st.figs[sel],was=passiveOn(F.stats);
+  F.stats=nw;save();render();
+  F.stats.forEach((s,i)=>{if(i!==F.lock)$('st'+i).classList.add('flash');});
+  if(!was&&passiveOn(nw))msg('✨ Passive activated! The figure awakens!',true);
+  else msg(nw.some((s,i)=>s.r==='S'&&i!==F.lock)?'🔥 S-Rank stat!':'',true);
+}
+function choose(takeNew){closeModal('choose');const p=pending;pending=null;if(takeNew)apply(p);else{msg('Kept old stats.',true);render();}}
+function miniList(stats){
+  return stats.map(s=>`<div class="mini"><div class="rk" style="color:var(--${s.r})">${s.r}</div><div>${STATS[s.s].n}<br><b>${statVal(s)}</b> · ${fmt(statScore(s))} pts</div></div>`).join('')+
+    `<div class="small" style="margin:10px 0">Passive ${worst(stats)} ${passiveOn(stats)?'<b>ACTIVE</b>':'inactive'} · Total <b style="color:var(--gold)">${fmt(figScore(stats))}</b></div>`;
+}
+
+/* ============ SHOP ============ */
+function buildShop(){
+  const mk=(id,type,per,unit,icon)=>$(id).innerHTML=PRICES.map(p=>
+    `<div class="pack"><div style="font-size:34px">${icon}</div><div class="amt">${fmt(Math.floor(p*per))} ${unit}</div><button class="gbtn" onclick="buy('${type}',${p*per},${p})">$${p}</button></div>`).join('');
+  mk('shopGold','gold',1000000,'Gold','<img class="ico" src="img/icons/gold.png" alt="">');
+  mk('shopPolish','polish',16,'Polish','<img class="ico" src="img/icons/polish.png" alt="">');
+  mk('shopSeal','seal',1.5,'Seals','<img class="ico" src="img/icons/seal.png" alt="">');
+}
+function buy(type,amt,price){st[type]+=Math.floor(amt);st.paid+=price;save();render();$('paidTxt').textContent='$'+fmt(st.paid);}
+
+/* ============ LEADERBOARD ============ */
+function seeded(seed){return()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;};}
+const BOT_NAMES=['ShadowMonarch','ChaHaeIn','BaekYoonho','ChoiJongIn','GoGunhee','ThomasAndre','Liu_Zhigang','HwangDongsoo','Esil','Beru_Main','Igris99','MinByungGu'];
+let BOTS=null;
+function makeBots(){
+  const rng=seeded(20261125);
+  BOTS=BOT_NAMES.map(name=>{
+    const paid=[0,5,10,20,50,100,200,500,1000][Math.floor(rng()*9)],rolls=15+paid*2;
+    const figs=FIGS.map(()=>{let best=rollFig(rng);for(let i=0;i<rolls;i++){const t=rollFig(rng);if(figScore(t)>figScore(best))best=t;}return{stats:best};});
+    return{name,paid,figs};
+  });
+}
+function summary(p){
+  const scores=p.figs.map(f=>figScore(f.stats)),bi=scores.indexOf(Math.max(...scores));
+  return{name:p.name,paid:p.paid||0,score:scores.reduce((a,b)=>a+b,0),pass:p.figs.filter(f=>passiveOn(f.stats)).length,best:FIGS[bi].n+' ('+fmt(scores[bi])+')',figs:p.figs};
+}
+let boardRows=[];
+async function openBoard(){
+  $('nameIn').value=st.name;
+  if(online){
+    $('boardBody').innerHTML='<tr><td colspan="6">Loading…</td></tr>';$('boardDetail').innerHTML='';openModal('board');
+    try{
+      pushNow();
+      const snap=await db.ref(`${DB_ROOT}/board`).orderByChild('score').limitToLast(100).get();
+      const rows=[];
+      snap.forEach(c=>{const v=c.val();if(valid(v))rows.push({...summary({name:v.name||'Hunter',paid:v.paid,figs:v.figs}),me:c.key===uid?1:0});});
+      if(!rows.some(r=>r.me))rows.push({...summary(st),me:1});
+      boardRows=rows.sort((a,b)=>b.score-a.score);
+    }catch(e){$('boardBody').innerHTML=`<tr><td colspan="6">Could not load: ${esc(e.code||e.message)}</td></tr>`;return;}
+  }else{
+    if(!BOTS)makeBots();
+    boardRows=[...BOTS.map(summary),{...summary(st),me:1}].sort((a,b)=>b.score-a.score);
+  }
+  $('boardBody').innerHTML=boardRows.map((r,i)=>
+    `<tr class="clk ${r.me?'me':''}" onclick="detail(${i})"><td>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td><td>${r.me?'⭐ ':''}${esc(r.name)}</td><td><b>${fmt(r.score)}</b></td><td>${r.pass}/5</td><td>${r.best}</td><td>$${fmt(r.paid)}</td></tr>`).join('');
+  detail(boardRows.findIndex(r=>r.me));
+  openModal('board');
+}
+function detail(i){
+  const r=boardRows[i],tot={};
+  r.figs.forEach(f=>f.stats.forEach(s=>{tot[s.s]=(tot[s.s]||0)+STATS[s.s].v[s.r];}));
+  const totals=STATS.map((d,k)=>tot[k]?`<tr><td>${d.n}</td><td><b>${d.pct?tot[k]+'%':fmt(tot[k])}</b></td></tr>`:'').join('');
+  const figs=r.figs.map((f,k)=>`<tr><td>${FIGS[k].n}</td><td>${f.stats.map(s=>`<b style="color:var(--${s.r})">${s.r}</b> ${STATS[s.s].n} ${statVal(s)}`).join('<br>')}</td><td>${passiveOn(f.stats)?'✨':''} ${fmt(figScore(f.stats))}</td></tr>`).join('');
+  $('boardDetail').innerHTML=`<h4>${esc(r.name)} — Total stats</h4><div class="cmp"><table>${totals}</table><table>${figs}</table></div>`;
+}
+function setName(v){st.name=(v||'Hunter').trim().slice(0,16)||'Hunter';st.named=true;save();pushNow();openBoard();}
+function resetAll(){if(confirm('Reset all your figures, currency and paid total? (also resets your online save)')){st=fresh();st.named=true;save();pushNow();closeModal('board');render();}}
+
+/* ============ RATE INFO ============ */
+function buildRate(){
+  $('rateBody').innerHTML=`<table><tr><th>Stat</th>${RANKS.map(R=>`<th style="color:var(--${R.r})">${R.r} (${R.p}%)</th>`).join('')}</tr>`+
+    STATS.map(d=>`<tr><td>${d.n}</td>${RANKS.map(R=>`<td>${d.pct?d.v[R.r]+'%':fmt(d.v[R.r])}<br><span class="small">${fmt(R.base+d.bonus)} pts</span></td>`).join('')}</tr>`).join('')+
+    `<tr><td>Rate per stat</td>${RANKS.map(R=>`<td>${(R.p/9).toFixed(4)}%</td>`).join('')}</tr></table>
+    <p class="small">Passive activates when all 3 stats are B-Rank or higher (+${fmt(PASSIVE_BONUS)} pts). Passive rank = lowest stat rank (S S E → passive E).</p>`;
+}
+
+/* ============ MODALS ============ */
+function openModal(n){if(n==='shop')$('paidTxt').textContent='$'+fmt(st.paid);$('m-'+n).classList.add('show');}
+function closeModal(n){$('m-'+n).classList.remove('show');}
+
+/* ============ FIT TO SCREEN (landscape on phones) ============ */
+function fit(){
+  const w=innerWidth,h=innerHeight,stage=$('stage');
+  const rot=h>w; // portrait → rotate the game to landscape
+  if(rot){
+    const s=Math.min(h/1600,w/900);
+    stage.style.transform=`translate(${(w+900*s)/2}px,${(h-1600*s)/2}px) rotate(90deg) scale(${s})`;
+  }else{
+    const s=Math.min(w/1600,h/900);
+    stage.style.transform=`translate(${(w-1600*s)/2}px,${(h-900*s)/2}px) scale(${s})`;
+  }
+}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));
+
+fit();load();buildShop();buildRate();render();initOnline();
+</script>
+</body>
+</html>
