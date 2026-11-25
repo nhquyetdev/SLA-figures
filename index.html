@@ -64,8 +64,6 @@ button{font-family:inherit;cursor:pointer}
 .statue{width:397px;height:675px;display:flex;align-items:center;justify-content:center;position:relative}
 .statue img{width:397px;height:675px;object-fit:contain}
 .statue .ph{font-size:220px}
-.ptag{margin-top:6px;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:700;background:#262b55;color:var(--dim);white-space:nowrap}
-.ptag.on{background:linear-gradient(90deg,#8a6512,#e9c14a,#8a6512);color:#1d1400}
 
 /* tier colouring (used when no tier image exists, and as glow) */
 .tier-low .ph{filter:sepia(1) saturate(.6) brightness(.85)}
@@ -382,7 +380,6 @@ function render(){
   const f=FIGS[sel],F=st.figs[sel],on=passiveOn(F.stats),w=worst(F.stats),t=tierOf(F.stats);
   $('figName').textContent=f.n;
   const statue=$('statue');statue.className='statue tier-'+t;statue.innerHTML=imgHtml('figures',f,t);
-  const pt=$('ptag');pt.className='ptag'+(on?' on':'');
   $('statTitle').textContent=`Figure (${f.ex})`;
   $('unique').innerHTML=f.u;
   $('figScore').textContent=fmt(figScore(F.stats));
