@@ -40,7 +40,7 @@ button{font-family:inherit;cursor:pointer}
 .recruit{width:520px;height:520px;border:2px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--dim);font-size:20px;text-align:center}
 .recruit img{max-width:100%;max-height:100%;display:block}
 
-/* ---------- GAME ---------- */
+/* ---------- APP ---------- */
 .top{position:absolute;left:0;right:0;top:0;height:76px;display:flex;align-items:center;gap:14px;padding:0 26px;background:linear-gradient(#0a0c22ee,#0a0c2200)}
 .back{background:none;border:none;color:var(--text);font-size:34px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
 .back i{font-style:normal;color:#7d8cff;font-size:40px}
@@ -200,9 +200,9 @@ input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--tex
 <div class="modal-bg" id="m-shop"><div class="modal">
   <div class="mhead"><h3>🛒 Shop (simulation — no real money)</h3><button class="tbtn" onclick="closeModal('shop')">✕</button></div>
   <div class="small" style="margin-bottom:10px">Total paid: <b id="paidTxt" style="color:var(--gold)"></b></div>
-  <h4><img class="ico" src="img/icons/gold.png" alt=""> Gold ($1 = 1,000,000)</h4><div class="shopgrid" id="shopGold"></div>
-  <h4><img class="ico" src="img/icons/polish.png" alt=""> Polish of Change ($5 = 80)</h4><div class="shopgrid" id="shopPolish"></div>
-  <h4><img class="ico" src="img/icons/seal.png" alt=""> Seals of Unity ($10 = 15)</h4><div class="shopgrid" id="shopSeal"></div>
+  <h4><img class="ico" src="img/icons/gold.png" alt=""> Gold ($1 = 3,000,000)</h4><div class="shopgrid" id="shopGold"></div>
+  <h4><img class="ico" src="img/icons/polish.png" alt=""> Polish of Change ($1 = 150)</h4><div class="shopgrid" id="shopPolish"></div>
+  <h4><img class="ico" src="img/icons/seal.png" alt=""> Seals of Unity ($1 = 4)</h4><div class="shopgrid" id="shopSeal"></div>
 </div></div>
 
 <!-- Leaderboard -->
@@ -436,9 +436,9 @@ function miniList(stats){
 function buildShop(){
   const mk=(id,type,per,unit,icon)=>$(id).innerHTML=PRICES.map(p=>
     `<div class="pack"><div style="font-size:34px">${icon}</div><div class="amt">${fmt(Math.floor(p*per))} ${unit}</div><button class="gbtn" onclick="buy('${type}',${p*per},${p})">$${p}</button></div>`).join('');
-  mk('shopGold','gold',1000000,'Gold','<img class="ico" src="img/icons/gold.png" alt="">');
-  mk('shopPolish','polish',16,'Polish','<img class="ico" src="img/icons/polish.png" alt="">');
-  mk('shopSeal','seal',1.5,'Seals','<img class="ico" src="img/icons/seal.png" alt="">');
+  mk('shopGold','gold',3000000,'Gold','<img class="ico" src="img/icons/gold.png" alt="">');
+  mk('shopPolish','polish',150,'Polish','<img class="ico" src="img/icons/polish.png" alt="">');
+  mk('shopSeal','seal',4,'Seals','<img class="ico" src="img/icons/seal.png" alt="">');
 }
 function buy(type,amt,price){st[type]+=Math.floor(amt);st.paid+=price;save();render();$('paidTxt').textContent='$'+fmt(st.paid);}
 
