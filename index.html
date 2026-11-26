@@ -200,9 +200,9 @@ input[type=text]{background:#10132c;border:1px solid var(--line);color:var(--tex
 <div class="modal-bg" id="m-shop"><div class="modal">
   <div class="mhead"><h3>🛒 Shop (simulation — no real money)</h3><button class="tbtn" onclick="closeModal('shop')">✕</button></div>
   <div class="small" style="margin-bottom:10px">Total paid: <b id="paidTxt" style="color:var(--gold)"></b></div>
-  <h4><img class="ico" src="img/icons/gold.png" alt=""> Gold ($1 = 3,000,000)</h4><div class="shopgrid" id="shopGold"></div>
+  <h4><img class="ico" src="img/icons/gold.png" alt=""> Gold ($1 = 10,000,000)</h4><div class="shopgrid" id="shopGold"></div>
   <h4><img class="ico" src="img/icons/polish.png" alt=""> Polish of Change ($1 = 150)</h4><div class="shopgrid" id="shopPolish"></div>
-  <h4><img class="ico" src="img/icons/seal.png" alt=""> Seals of Unity ($1 = 4)</h4><div class="shopgrid" id="shopSeal"></div>
+  <h4><img class="ico" src="img/icons/seal.png" alt=""> Seals of Unity ($1 = 6)</h4><div class="shopgrid" id="shopSeal"></div>
 </div></div>
 
 <!-- Leaderboard -->
@@ -436,9 +436,9 @@ function miniList(stats){
 function buildShop(){
   const mk=(id,type,per,unit,icon)=>$(id).innerHTML=PRICES.map(p=>
     `<div class="pack"><div style="font-size:34px">${icon}</div><div class="amt">${fmt(Math.floor(p*per))} ${unit}</div><button class="gbtn" onclick="buy('${type}',${p*per},${p})">$${p}</button></div>`).join('');
-  mk('shopGold','gold',3000000,'Gold','<img class="ico" src="img/icons/gold.png" alt="">');
+  mk('shopGold','gold',10000000,'Gold','<img class="ico" src="img/icons/gold.png" alt="">');
   mk('shopPolish','polish',150,'Polish','<img class="ico" src="img/icons/polish.png" alt="">');
-  mk('shopSeal','seal',4,'Seals','<img class="ico" src="img/icons/seal.png" alt="">');
+  mk('shopSeal','seal',6,'Seals','<img class="ico" src="img/icons/seal.png" alt="">');
 }
 function buy(type,amt,price){st[type]+=Math.floor(amt);st.paid+=price;save();render();$('paidTxt').textContent='$'+fmt(st.paid);}
 
