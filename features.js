@@ -1,12 +1,6 @@
-/* =====================================================================
-
-@LichStream
-
-   ===================================================================== */
 (function(){
 'use strict';
 
-/* ---------------- CSS ---------------- */
 const css=`
 .cvrow{display:flex;gap:14px;margin-top:8px;align-items:stretch}
 .cvrow .convert{margin-top:0!important;flex:1;width:auto!important;padding:10px!important}
@@ -38,9 +32,13 @@ const css=`
 .hitrow{display:flex;align-items:center;gap:14px;margin:10px 0;font-size:22px}
 .hitrow .rk{width:58px;height:58px;font-size:34px}
 .warn{color:#ffb84d}
+.spentline{margin-top:6px;font-size:16px;color:var(--dim);white-space:nowrap}
+.spentline b{color:#cfd8ff}
+td.spentc{font-size:15px;color:#cfd8ff;white-space:nowrap}
 `;
 const styleEl=document.createElement('style');styleEl.textContent=css;document.head.appendChild(styleEl);
 
+/* ---------------- MODALS ---------------- */
 const stageEl=document.getElementById('stage')||document.body;
 stageEl.insertAdjacentHTML('beforeend',`
 <div class="modal-bg" id="m-pref"><div class="modal" style="width:1150px">
@@ -85,7 +83,8 @@ if(fsEl)fsEl.parentNode.insertBefore(prefBtn,fsEl);
 const SALT='SLF~figures~v2~'+String.fromCharCode(76,105,99,104);
 function sign(o){
   const core=JSON.stringify([o.gold,o.polish,o.seal,o.paid,o.rolls||0,o.rs||0,
-    o.figs.map(f=>[f.stats.map(s=>s.r+s.s).join(','),f.lock,f.rolls||0])]);
+    o.figs.map(f=>[f.stats.map(s=>s.r+s.s).join(','),f.lock,f.rolls||0])]
+    .concat(o.spent?[[o.spent.gold,o.spent.polish,o.spent.seal]]:[]));
   let h=2166136261;const str=SALT+core;
   for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
   return (h>>>0).toString(36);
@@ -115,11 +114,13 @@ valid=function(o){
     if(typeof st.rs!=='number')st.rs=sumRolls*3;
   }
   if(!st.pref)st.pref={rank:'S',count:1,types:[]};
+  ensureSpent();
   save();
 })();
+function ensureSpent(){if(st&&!st.spent)st.spent={gold:0,polish:0,seal:0};}
 function tamperReset(){
   alert('Your save data was changed outside the game, so it has been reset.');
-  st=fresh();st.rolls=0;st.rs=0;st.pref={rank:'S',count:1,types:[]};save();
+  st=fresh();st.rolls=0;st.rs=0;st.pref={rank:'S',count:1,types:[]};st.spent={gold:0,polish:0,seal:0};save();
 }
 
 function suspicious(v){
@@ -129,6 +130,7 @@ function suspicious(v){
   v.figs.forEach(f=>f.stats.forEach(s=>{if(s.r==='S')S++;if(s.r==='S'||s.r==='A')SA++;}));
   return S>2+v.rs*0.05||SA>3+v.rs*0.09;
 }
+
 
 function normName(v){return String(v||'').replace(/[.#$\[\]\/\\]/g,'').replace(/\s+/g,' ').trim().slice(0,16);}
 async function claimName(n){
@@ -168,11 +170,11 @@ pushNow=async function(){
   pushing=true;
   try{
     await ensureName();
-    st.h=sign(st);
+    ensureSpent();st.h=sign(st);
     const s=summary(st),up={};
     up[`${DB_ROOT}/saves/${uid}`]=st;
     up[`${DB_ROOT}/board/${uid}`]={name:st.name,paid:st.paid||0,score:s.score,pass:s.pass,
-      rolls:st.rolls||0,rs:st.rs||0,figs:st.figs.map(f=>({stats:f.stats})),
+      rolls:st.rolls||0,rs:st.rs||0,spent:{gold:st.spent.gold,polish:st.spent.polish,seal:st.spent.seal},figs:st.figs.map(f=>({stats:f.stats})),
       updated:firebase.database.ServerValue.TIMESTAMP};
     await db.ref().update(up);
     try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}
@@ -182,6 +184,7 @@ pushNow=async function(){
     if(typeof setNet==='function')setNet(false,'Save failed — '+(e.code||e.message));
   }finally{lastPush=Date.now();pushing=false;}
 };
+
 
 startGame=async function(){
   if(typeof goLandscape==='function')goLandscape();
@@ -220,18 +223,18 @@ openBoard=async function(){
       snap.forEach(c=>{
         const v=c.val();if(!_valid(v))return;
         const me=c.key===uid,sus=suspicious(v);
-        if(sus&&!me)return;                       // hide impossible entries
-        rows.push({...summary({name:v.name||'Hunter',paid:v.paid,figs:v.figs}),me:me?1:0,sus});
+        if(sus&&!me)return;
+        rows.push({...summary({name:v.name||'Hunter',paid:v.paid,figs:v.figs}),spent:me?st.spent:v.spent,me:me?1:0,sus});
       });
-      if(!rows.some(r=>r.me))rows.push({...summary(st),me:1});
+      if(!rows.some(r=>r.me))rows.push({...summary(st),spent:st.spent,me:1});
       boardRows=rows.sort((a,b)=>b.score-a.score);
     }catch(e){$('boardBody').innerHTML=`<tr><td colspan="6">Could not load: ${esc(e.code||e.message)}</td></tr>`;return;}
   }else{
     if(!BOTS)makeBots();
-    boardRows=[...BOTS.map(summary),{...summary(st),me:1}].sort((a,b)=>b.score-a.score);
+    boardRows=[...BOTS.map(summary),{...summary(st),spent:st.spent,me:1}].sort((a,b)=>b.score-a.score);
   }
   $('boardBody').innerHTML=boardRows.map((r,i)=>
-    `<tr class="clk ${r.me?'me':''}" onclick="detail(${i})"><td>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td><td>${r.me?'⭐ ':''}${esc(r.name)}${r.sus?' <span class="warn">⚠️ hidden (unusual stats)</span>':''}</td><td><b>${fmt(r.score)}</b></td><td>${r.pass}/5</td><td>${r.best}</td><td>$${fmt(r.paid)}</td></tr>`).join('');
+    `<tr class="clk ${r.me?'me':''}" onclick="detail(${i})"><td>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td><td>${r.me?'⭐ ':''}${esc(r.name)}${r.sus?' <span class="warn">⚠️ hidden (unusual stats)</span>':''}</td><td><b>${fmt(r.score)}</b></td><td>${r.pass}/5</td><td>${r.best}</td><td>$${fmt(r.paid)}</td><td class="spentc">${spentShort(r.spent)}</td></tr>`).join('');
   detail(Math.max(0,boardRows.findIndex(r=>r.me)));
   openModal('board');
 };
@@ -271,6 +274,7 @@ const SLF=window.SLF={
   applyPref(){st.pref=draft;save();closeModal('pref');render();msg('Preferred stats saved.',true);}
 };
 
+
 function hitStat(s){
   const p=st.pref;
   return RI[s.r]<=RI[p.rank]&&(p.types.length===0||p.types.includes(s.s));
@@ -282,10 +286,12 @@ function checkHits(nw,lock){
   return hits.length>=need?hits:[];
 }
 
+
 function doRoll(){
   const F=st.figs[sel],c=curCost();
   if(st.gold<c.gold||st.polish<c.polish||st.seal<c.seal)return null;
   st.gold-=c.gold;st.polish-=c.polish;st.seal-=c.seal;
+  ensureSpent();st.spent.gold+=c.gold;st.spent.polish+=c.polish;st.spent.seal+=c.seal;
   F.rolls=(F.rolls||0)+1;st.rolls=(st.rolls||0)+1;
   const lock=F.lock;
   const nw=F.stats.map((s,i)=>i===lock?{...s}:rollOne());
@@ -318,6 +324,7 @@ convert=function(){
   else{apply(r.nw);if(r.hits.length)notify(r.nw,r.hits);}
 };
 
+/* ---------------- AUTO ---------------- */
 const auto={on:false,timer:null,count:0};
 function affordable(){
   const c=curCost();
@@ -385,9 +392,27 @@ const _toggleLock=toggleLock;toggleLock=function(i){stopAuto();_toggleLock(i);};
 if(typeof showMenu==='function'){const _sm=showMenu;showMenu=function(){stopAuto();_sm();};}
 const sc=$('saveChk');if(sc)sc.addEventListener('change',()=>stopAuto());
 const _resetAll=resetAll;
-resetAll=function(){stopAuto();_resetAll();if(!st.pref)st.pref={rank:'S',count:1,types:[]};st.rolls=st.rolls||0;st.rs=st.rs||0;save();render();};
+resetAll=function(){stopAuto();_resetAll();if(!st.pref)st.pref={rank:'S',count:1,types:[]};st.rolls=st.rolls||0;st.rs=st.rs||0;st.spent={gold:0,polish:0,seal:0};save();render();};
 
 const _render=render;
-render=function(){if(st&&!st.pref)st.pref={rank:'S',count:1,types:[]};_render();updateAutoUI();};
+render=function(){if(st&&!st.pref)st.pref={rank:'S',count:1,types:[]};ensureSpent();_render();updateAutoUI();paintSpent();};
+
+
+function short(n){n=n||0;return n>=1e9?(n/1e9).toFixed(n>=1e10?0:1)+'B':n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+'M':n>=1e4?(n/1e3).toFixed(0)+'K':fmt(n);}
+function spentShort(sp){return sp?`${short(sp.gold)} Gold · ${fmt(sp.polish)} Polish · ${fmt(sp.seal)} Seals`:'—';}
+const spentEl=document.createElement('div');spentEl.className='spentline';
+const midCol=document.querySelector('.col-mid');if(midCol)midCol.appendChild(spentEl);
+function paintSpent(){if(st&&st.spent)spentEl.innerHTML=`Spent: <b>${spentShort(st.spent)}</b> · ${fmt(st.rolls||0)} rolls`;}
+
+const headRow=document.querySelector('#m-board thead tr');
+if(headRow&&!headRow.querySelector('.spentc')){const th=document.createElement('th');th.className='spentc';th.textContent='Spent';headRow.appendChild(th);}
+
+const _detail=detail;
+detail=function(i){
+  _detail(i);
+  const r=boardRows[i];if(!r)return;
+  const box=$('boardDetail');
+  box.insertAdjacentHTML('afterbegin',`<div class="hitnote" style="text-align:left">💸 ${esc(r.name)} spent: ${r.spent?`<b>${fmt(r.spent.gold)}</b> Gold · <b>${fmt(r.spent.polish)}</b> Polish of Change · <b>${fmt(r.spent.seal)}</b> Seals of Unity`:'not recorded yet'} · Paid <b>$${fmt(r.paid||0)}</b></div>`);
+};
 render();
 })();
